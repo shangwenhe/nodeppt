@@ -1,0 +1,17 @@
+{
+  "name": "fis3",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodeppt start -p 8900",
+    "nodeppt": "nodeppt",
+    "help": "nodeppt -h"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "nodeppt": "^1.4.5"
+  }
+}
