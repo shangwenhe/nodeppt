@@ -1,15 +1,15 @@
 title: test
 speaker: speaker
 url: https://github.com/ksky521/nodeppt
-transition: slide
-files: /js/demo.js,/css/demo.css
+transition: move
+files: /fe/main.css
 
-[slide]
+[slide  data-transition="slide1"]
 
 # 前端工程构建工具
 ## 演讲者：shangwenhe@vipkid.com.cn
 
-[slide]
+[slide  data-transition="slide"]
 
 # 前端工程构建 {:&.flexbox.vleft}
 ### 配置,注册插件
@@ -66,7 +66,7 @@ gulp.watch('file', function(event){
 
 
 
-[slide]
+[slide data-transition="slide"]
 # webpack
 [slide style="background:#2B3A42 no-repeat 50% 50% ;background-image:  url('/fe/webpack/webpack.svg') , url('/fe/webpack/modules.svg');background-size:20%, contain;"]
 
@@ -239,7 +239,7 @@ module:{
   });
   
 ```
-[slide]
+[slide data-transition="slide"]
 # webpack构建流程 {:&.flexbox.vleft}
 ### 从启动webpack构建到输出结果经历了一系列过程，它们是：
 
@@ -251,9 +251,7 @@ module:{
 
 	4、载入loader
 
-	5、产出文件，生成chunk
-
-	6、输出chunk
+	5、生成chunk, 输出chunk
 
 
 [slide]
@@ -296,7 +294,7 @@ compiler.plugin("make", (compilation, callback) => {
 
 // chunk组成bundle
 addChunk(name, module, loc) {
-	... ... 省略
+	// ... ... 省略
 	const chunk = new Chunk(name, module, loc);
 	this.chunks.push(chunk);
 	if(name) {
@@ -307,9 +305,9 @@ addChunk(name, module, loc) {
 
 // 计算文件依赖
 processDependenciesBlockForChunk(module, chunk) {
-	... ... 省略
+	// ... ... 省略
 	const iteratorBlock = b => {
-		... ... 省略
+		// ... ... 省略
 		c = this.addChunk(b.chunkName, b.module, b.loc);
 		let deps = chunkDependencies.get(chunk);
 		if(!deps) chunkDependencies.set(chunk, deps = []);
@@ -320,22 +318,75 @@ processDependenciesBlockForChunk(module, chunk) {
 ```
 
 [slide]
-# 4、载入module {:&.flexbox.vleft}
+
+# 4、载入loader {:&.flexbox.vleft}
 在解析文件,递归的过程中根据test文件类型和module配置找出合适的loader用来对文件进行转换。
+```javascript
+
+	const normalModuleFactory = new NormalModuleFactory(this.options.context,
+			this.resolvers, this.options.module || {});
+	// 定义上下文件环境
+	this.applyPlugins("normal-module-factory", normalModuleFactory);
+
+	const params = this.newCompilationParams();
+	this.applyPluginsAsync("before-compile", params, err => {
+		// ... ... 略
+		// 编译结果
+		const compilation = this.newCompilation(params);
+		this.applyPluginsParallel("make", compilation, err => {
+		// ... ... 略
+			compilation.seal(err => {
+				this.applyPluginsAsync("after-compile", compilation, err => {
+					return callback(null, compilation);
+				});
+			});
+		});
+	});
+```
 
 [slide]
-# 5、产出文件，生成chunk {:&.flexbox.vleft}
+# 5、生成chunk，输出chunk {:&.flexbox.vleft}
 从entry开始递归完后得到每个文件的最终结果，并生成代码块chunk。
+```javascript
+	// 将编译后的文件写入到文件中
+ const emitFiles = (err) => {
+      require("async").forEach(Object.keys(compilation.assets), (file, callback) => {
+
+        let targetFile = file;
+        const queryStringIdx = targetFile.indexOf("?");
+        if(queryStringIdx >= 0) {
+          targetFile = targetFile.substr(0, queryStringIdx);
+        }
+
+        const writeOut = (err) => {
+          if(err) return callback(err);
+          const targetPath = this.outputFileSystem.join(outputPath, targetFile);
+          let content = compilation.assets[file].source();
+          // ... ... 略
+          this.outputFileSystem.writeFile(targetPath, content, callback);
+        };
+        // 如果包含目录则创建目录
+        if(targetFile.match(/\/|\\/)) {
+          const dir = path.dirname(targetFile);
+          this.outputFileSystem.mkdirp(this.outputFileSystem.join(outputPath, dir), writeOut);
+        } else writeOut();
+
+      }, err => {
+        if(err) return callback(err);
+        afterEmit.call(this);
+      });
+	}
+	// 由emit 触发
+	this.applyPluginsAsync("emit", compilation, err => {
+		if(err) return callback(err);
+		outputPath = compilation.getPath(this.outputPath);
+		this.outputFileSystem.mkdirp(outputPath, emitFiles);
+	});
+```	
+
 
 [slide]
-# 6、输出chunk {:&.flexbox.vleft}
-输出所有chunk到文件系统。
-	
-需要注意的是，在构建生命周期中有一系列插件在合适的时机做了合适的事情，比如UglifyJsPlugin会在loader转换递归完后对结果再使用UglifyJs压缩覆盖之前的结果。
-
-
-[slide]
-# 原码深入
+# 深入了解产出
 
 [slide]
 # 原码深入 {:&.flexbox.vleft}
@@ -377,11 +428,8 @@ entry();
 
 [slide]
 
-## 完整示例	
-
+# 完整示例	{:&.flexbox.vleft}
 ```javascript
-
-
 
 (function(modules){
    var installedModules = {};
@@ -396,9 +444,7 @@ entry();
  				exports: {}
 			};
       	// console.log(moduleId,module,installedModules);
-  	 	modules[moduleId].call(module.exports,
-        	module, module.exports, __webpack_require__
-        );
+  	 	modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
      	return module.exports;
     }
   

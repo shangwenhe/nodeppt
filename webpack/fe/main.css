@@ -1,0 +1,11 @@
+/**
+ *  @file: main.css is a <css> file
+ *  @date: File created 2017-09-18 18:27
+ *  @author:  shangwenhe
+ */
+#container .slide .slide-wrapper{
+  max-width: 1180px;  
+}
+.main{
+  display: block;
+}
