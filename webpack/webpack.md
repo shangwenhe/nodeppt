@@ -7,7 +7,7 @@ files: /fe/main.css
 [slide  data-transition="slide1"]
 
 # 前端工程构建工具
-## 演讲者：shangwenhe@vipkid.com.cn
+## 演讲者：shangwenhe
 
 [slide  data-transition="slide"]
 
@@ -459,12 +459,14 @@ entry();
     }), 
   	(function(module, exports, __webpack_require__){
      console.log(1); 
-      __webpack_require__(2);
+      let module2 = __webpack_require__(2);
+       console.log(module2)
       module.exports =  { index:'test1'}
     }), 
   	(function(module, exports, __webpack_require__){
         console.log(2);
-       __webpack_require__(3);
+       let module3 = __webpack_require__(3);
+       console.log(module3)
        module.exports =  { index:'test2'}
     }), 
     (function(module, exports, __webpack_require__){
@@ -474,21 +476,6 @@ entry();
 ])
 
 ```
+https://codepen.io/shangwenhe/pen/gGPvMz
 
-[slide]
-## 使用.class/#id/自定义属性样式
-----
 
-```javascript
-alert('nodeppt');
-```
-
-[slide]
-
-## 主页面样式
-### ----是上下分界线
-----
-
-nodeppt是基于nodejs写的支持 **Markdown!** 语法的网页PPT，当前版本：1.4.5
-
-Github：https://github.com/ksky521/nodeppt
