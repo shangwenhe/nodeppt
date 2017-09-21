@@ -1,5 +1,5 @@
-title: test
-speaker: speaker
+title: 前端工程构建工具 
+speaker: shangwenhe
 url: https://github.com/ksky521/nodeppt
 transition: move
 files: /fe/main.css
@@ -12,10 +12,15 @@ files: /fe/main.css
 [slide  data-transition="slide"]
 
 # 前端工程构建 {:&.flexbox.vleft}
-### 配置,注册插件
-### 计算依赖
-### 编译,文件转换
-### 产出文件
+### gulp
+### webpack
+
+[slide  data-transition="slide"]
+
+# webpack的使用及带来的问题 {:&.flexbox.vleft}
+### npm run start 
+### 依赖问题, npm install
+### 解决node_module版本问题 
 
 [slide style="background-image:url('/fe/gulp/gulp-white-text.svg');background-color:#cf4646;"]
 
@@ -67,7 +72,12 @@ gulp.watch('file', function(event){
 
 
 [slide data-transition="slide"]
-# webpack
+# webpack {:&.flexbox.vleft}
+### 配置,注册插件
+### 计算依赖
+### 编译,文件转换
+### 产出文件
+
 [slide style="background:#2B3A42 no-repeat 50% 50% ;background-image:  url('/fe/webpack/webpack.svg') , url('/fe/webpack/modules.svg');background-size:20%, contain;"]
 
 [slide]
@@ -241,7 +251,8 @@ module:{
 ```
 [slide data-transition="slide"]
 # webpack构建流程 {:&.flexbox.vleft}
-### 从启动webpack构建到输出结果经历了一系列过程，它们是：
+<img src='/fe/webpack.jpg' width=150 />
+### webpack生命周期，它们是：
 
 	1、生成配置
 
@@ -283,6 +294,7 @@ if(options.plugins && Array.isArray(options.plugins)) {
 
 [slide]
 # 3、解析文件依赖 {:&.flexbox.vleft}
+<img src='/fe/test.png' width='150px;' />
 从配置的entry入口文件开始解析文件构建AST语法树，找出每个文件所依赖的文件，递归下去。
 <br/>计算依赖与计算bundle是同时的
 ```javascript
@@ -348,6 +360,12 @@ processDependenciesBlockForChunk(module, chunk) {
 # 5、生成chunk，输出chunk {:&.flexbox.vleft}
 从entry开始递归完后得到每个文件的最终结果，并生成代码块chunk。
 ```javascript
+	// 由emit 触发
+	this.applyPluginsAsync("emit", compilation, err => {
+		if(err) return callback(err);
+		outputPath = compilation.getPath(this.outputPath);
+		`this.outputFileSystem.mkdirp(outputPath, emitFiles);`
+	});
 	// 将编译后的文件写入到文件中
  const emitFiles = (err) => {
       require("async").forEach(Object.keys(compilation.assets), (file, callback) => {
@@ -376,12 +394,6 @@ processDependenciesBlockForChunk(module, chunk) {
         afterEmit.call(this);
       });
 	}
-	// 由emit 触发
-	this.applyPluginsAsync("emit", compilation, err => {
-		if(err) return callback(err);
-		outputPath = compilation.getPath(this.outputPath);
-		this.outputFileSystem.mkdirp(outputPath, emitFiles);
-	});
 ```	
 
 
@@ -479,5 +491,63 @@ entry();
 https://codepen.io/shangwenhe/pen/gGPvMz
 
 [slide]
+# 使用编
+https://codepen.io/shangwenhe/pen/oGLWgj
 
+[slide]
+# 两大类 {:&.flexbox.vleft}
+
+## 纯前端代码编译
+&nbsp;&nbsp;&nbsp;&nbsp;纯前端代码
+
+## 依赖nodejs
+&nbsp;&nbsp;&nbsp;&nbsp;生成产物需要node环境才可以
+
+[slide]
+# npm install {:&.flexbox.vleft}
+## package.json 带来的问题
+
+  1. 模块更新问题
+  2. 下载速度问题
+
+## 如何解决？
+
+[slide]
+# 编译需要的模块 {:&.flexbox.vleft}
+  jade, less, styl, bable
+
+<br />
+### 1. npm shrinkwrap 锁定编译依赖关系 
+### 2. 放到编译机中统一管理
+
+[slide]
+# 项目依赖的模块 {:&.flexbox.vleft}
+  vue, vuex, vue-router, axios;
+
+### 放到项目中，明确引用
+```javascript
+// webpack.config.js
+resolve:{
+  alias: { // 创建 import 或 require 的别名
+    'vue': 'src/static/vue/vue.min.js', // 明确指定引入模块 
+    'vuex': 'src/static/vuex/vuex.min.js', // 明确指定引入模块
+    '@': path.resolve(__dirname, '../src') // 配置绝对地址 basePath
+  },
+  // 告诉 webpack 解析模块时应该搜索的目录。
+  modules: [distth.resolve(__dirname, "./src"), "node_modules"]
+}
+
+// app.entry.js
+let vue = require('vue');
+import Vue from 'vue';
+```
+
+[slide]
+# 结束语 {:&.flexbox.vleft}
+### 为了保证线上代码的稳定性请大家在项目添加 npm-shrinkwrap.json
+## 安装方式
+### npm shrinkwrap
+说明文档https://docs.npmjs.com/files/shrinkwrap.json 
+
+[slide]
 # Q&A

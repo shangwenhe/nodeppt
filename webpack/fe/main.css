@@ -6,6 +6,6 @@
 #container .slide .slide-wrapper{
   max-width: 1180px;  
 }
-.main{
-  display: block;
+#container .img-full img{
+  background: none;
 }
